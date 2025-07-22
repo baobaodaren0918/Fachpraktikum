@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktive Medizinische Taxonomie - German Language</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #003F5C, #2A8CCF);
+            color: white;
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,63,92,0.25);
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.75rem;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2.5rem auto;
+            padding: 0 2rem;
+        }
+
+        .stats-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0,63,92,0.08);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            border: 1px solid #e8f1f8;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid #e1e8ed;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-item.emerging {
+            background: linear-gradient(135deg, #2A8CCF, #7FB3D7);
+            color: white;
+            border: none;
+            box-shadow: 0 6px 20px rgba(42,140,207,0.3);
+        }
+
+        .stat-item.trending {
+            background: linear-gradient(135deg, #003F5C, #1B5A7A);
+            color: white;
+            border: none;
+            box-shadow: 0 6px 20px rgba(0,63,92,0.3);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 200;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            font-weight: 400;
+            opacity: 0.95;
+        }
+
+        .taxonomy-tree {
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0,63,92,0.08);
+            border: 1px solid #e8f1f8;
+        }
+
+        .tree-node {
+            margin: 1.2rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,63,92,0.06);
+            border: 1px solid #e8f1f8;
+            transition: all 0.2s ease;
+        }
+
+        .tree-node:hover {
+            box-shadow: 0 4px 16px rgba(0,63,92,0.12);
+        }
+
+        .node-header {
+            padding: 1.2rem 1.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            font-weight: 400;
+        }
+
+        .node-header:hover {
+            transform: translateY(-1px);
+        }
+
+        .root-node .node-header {
+            background: linear-gradient(135deg, #003F5C, #1B5A7A);
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 300;
+            border: none;
+        }
+
+        .level-0 .node-header {
+            background: linear-gradient(135deg, #003F5C, #1B5A7A);
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 300;
+        }
+
+        .level-1 .node-header {
+            background: linear-gradient(135deg, #2A8CCF, #5BA3D9);
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 400;
+        }
+
+        .level-2 .node-header {
+            background: linear-gradient(135deg, #7FB3D7, #A1C6E0);
+            color: white;
+            font-size: 1.05rem;
+        }
+
+        .level-3 .node-header {
+            background: linear-gradient(135deg, #B8D4E7, #D2E3F0);
+            color: #003F5C;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .level-4 .node-header {
+            background: #f8fafb;
+            color: #003F5C;
+            border-left: 4px solid #2A8CCF;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .level-5 .node-header {
+            background: #f0f7fc;
+            color: #1B5A7A;
+            border-left: 3px solid #7FB3D7;
+            font-size: 0.9rem;
+            margin-left: 1.2rem;
+        }
+
+        .level-6 .node-header {
+            background: #f8fbfe;
+            color: #2c3e50;
+            border-left: 3px solid #B8D4E7;
+            font-size: 0.85rem;
+            margin-left: 2.4rem;
+        }
+
+        .level-7 .node-header {
+            background: #fdfdfe;
+            color: #34495e;
+            border-left: 2px solid #D2E3F0;
+            font-size: 0.8rem;
+            margin-left: 3.6rem;
+        }
+
+        .expand-icon {
+            font-size: 1.3rem;
+            font-weight: 300;
+            transition: transform 0.3s ease;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(45deg);
+        }
+
+        .node-content {
+            display: none;
+            padding: 1.2rem;
+            background: #f8fafb;
+            border-top: 1px solid #e8f1f8;
+        }
+
+        .node-content.expanded {
+            display: block;
+        }
+
+        .level-indicator {
+            background: rgba(255,255,255,0.25);
+            padding: 0.25rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 300;
+            margin-right: 0.75rem;
+            color: inherit;
+            letter-spacing: 0.5px;
+        }
+
+        .node-count {
+            background: rgba(255,255,255,0.25);
+            padding: 0.35rem 0.9rem;
+            border-radius: 14px;
+            font-size: 0.8rem;
+            font-weight: 300;
+            margin-left: 1.2rem;
+            letter-spacing: 0.3px;
+        }
+
+        .children {
+            margin-top: 0.75rem;
+        }
+
+        .professional-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #003F5C, #2A8CCF);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            margin-left: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+                margin: 1.5rem auto;
+            }
+
+            .header {
+                padding: 2rem;
+            }
+
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .stats-panel {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Interaktive Medizinische Taxonomie</h1>
+        <p>Language: German | Erweiterte 7-Ebenen Medizinische Forschungsklassifikation</p>
+    </div>
+
+    <div class="container">
+        <div class="stats-panel">
+            <div class="stat-item emerging">
+                <span class="stat-number">15</span>
+                <span class="stat-label">Aufkommende Forschungsthemen</span>
+            </div>
+            <div class="stat-item trending">
+                <span class="stat-number">36</span>
+                <span class="stat-label">Trending Forschungsthemen</span>
+            </div>
+        </div>
+
+        <div class="taxonomy-tree">
+            <div class="tree-node root-node">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <span>Erweiterte Medizinische Forschungstaxonomie (7-Ebenen-Struktur)</span>
+                    <span class="expand-icon">+</span>
+                </div>
+                <div class="node-content">
+                    <div class="children" id="root-children">
+                        <!-- Complete 7-level structure will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Complete taxonomy tree data with 7 levels
+        const taxonomyTrees = {"emerging": {"taxonomy_type": "emerging", "language": "de", "tree": {"name": "Emerging Medical Research Taxonomy", "type": "root", "level": 0, "children": [{"name": "Psychiatrie und Psychotherapie", "type": "category", "level": 1, "children": [{"name": "Psychopharmakotherapie und Therapieansätze", "type": "research_area", "level": 2, "children": [{"name": "Medikamentensicherheit und -wirksamkeit", "type": "cluster", "level": 3, "children": [{"name": "Arzneimittelsicherheit in der Psychopharmakotherapie", "type": "topic", "level": 4, "topic_id": 14, "children": []}, {"name": "Atypische Antipsychotika: Sicherheit und Wirksamkeit", "type": "topic", "level": 4, "topic_id": 50, "children": []}]}, {"name": "Spezifische Patientengruppen und Risiken", "type": "cluster", "level": 3, "children": [{"name": "Schwangerschaft und Psychopharmaka Risiken", "type": "topic", "level": 4, "topic_id": 27, "children": []}, {"name": "Suizidalität und Pharmakotherapie bei Zwangsstörungen", "type": "topic", "level": 4, "topic_id": 26, "children": []}]}]}, {"name": "Therapeutische Ansätze und Modelle", "type": "research_area", "level": 2, "children": [{"name": "Therapeutische Beziehungen und Umgebungen", "type": "cluster", "level": 3, "children": [{"name": "Basler Modell: Therapeutische Beziehungsgrundsätze", "type": "topic", "level": 4, "topic_id": 49, "children": []}, {"name": "Therapeutische Milieugestaltung in Kliniken", "type": "topic", "level": 4, "topic_id": 1, "children": []}]}, {"name": "Spezialisierte Therapieformen", "type": "cluster", "level": 3, "children": [{"name": "Sexuelle Funktionsstörungen und Therapieansätze", "type": "topic", "level": 4, "topic_id": 5, "children": []}, {"name": "Stationäre Depressionsbehandlung und TRD", "type": "topic", "level": 4, "topic_id": 48, "children": []}]}]}]}, {"name": "Neuropsychiatrie und Verhaltenswissenschaften", "type": "category", "level": 1, "children": [{"name": "Kognitive und emotionale Störungen", "type": "research_area", "level": 2, "children": [{"name": "Kognitive Beeinträchtigungen und Therapien", "type": "cluster", "level": 3, "children": [{"name": "Kognitive Leistungsfähigkeit bei Bipolarer Störung", "type": "topic", "level": 4, "topic_id": 22, "children": []}, {"name": "Therapeutisches Drug Monitoring und Alkoholabhängigkeit", "type": "topic", "level": 4, "topic_id": 25, "children": []}]}, {"name": "Verhaltensstörungen und Risikomanagement", "type": "cluster", "level": 3, "children": [{"name": "Chronische Schmerzen und Aggressionsverhalten", "type": "topic", "level": 4, "topic_id": 4, "children": []}, {"name": "Prolongierte Trauer und Suizidrisiko", "type": "topic", "level": 4, "topic_id": 35, "children": []}]}]}, {"name": "Entwicklungspsychiatrie und Jugendliche", "type": "research_area", "level": 2, "children": [{"name": "Jugendpsychiatrie und Entwicklungsstörungen", "type": "cluster", "level": 3, "children": [{"name": "Emotionsregulation und Autismus bei Jugendlichen", "type": "topic", "level": 4, "topic_id": 46, "children": []}, {"name": "Entscheidungsprozesse in stationärer Psychotherapie", "type": "topic", "level": 4, "topic_id": 47, "children": []}]}, {"name": "Integrierte Versorgungsmodelle", "type": "cluster", "level": 3, "children": [{"name": "Integrierte Psychische Versorgung Wien", "type": "topic", "level": 4, "topic_id": 9, "children": []}]}]}]}]}, "total_topics": 15, "included_ids": [1, 4, 5, 9, 14, 22, 25, 26, 27, 35, 46, 47, 48, 49, 50]}, "trending": {"taxonomy_type": "trending", "language": "de", "tree": {"name": "Trending Medical Research Taxonomy", "type": "root", "level": 0, "children": [{"name": "Clinical Research & Patient Care", "type": "category", "level": 1, "children": [{"name": "Patient Management", "type": "research_area", "level": 2, "children": [{"name": "Psychiatrische Research", "type": "cluster", "level": 3, "children": [{"name": "Psychiatrische Pharmakotherapie und Patientenkommunikation", "type": "topic", "level": 4, "topic_id": 0, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Psychiatrie", "type": "keyword", "level": 7, "children": []}, {"name": "Alkoholiker", "type": "keyword", "level": 7, "children": []}, {"name": "Geschlossen", "type": "keyword", "level": 7, "children": []}, {"name": "Mensch", "type": "keyword", "level": 7, "children": []}]}]}]}, {"name": "Psychiatrische Interventionen im Arbeitskontext", "type": "topic", "level": 4, "topic_id": 24, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Arbeitsmarkt", "type": "keyword", "level": 7, "children": []}, {"name": "Psychiater", "type": "keyword", "level": 7, "children": []}, {"name": "Arbeitsfhigkeit", "type": "keyword", "level": 7, "children": []}, {"name": "Psychiatrisch", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Interventionen Research", "type": "cluster", "level": 3, "children": [{"name": "Interventionen in Suizidprävention und Demenz", "type": "topic", "level": 4, "topic_id": 7, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Schulung", "type": "keyword", "level": 7, "children": []}, {"name": "Suizidprvention", "type": "keyword", "level": 7, "children": []}, {"name": "Demenz", "type": "keyword", "level": 7, "children": []}, {"name": "Review", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Schizophrenie: Research", "type": "cluster", "level": 3, "children": [{"name": "Schizophrenie: Medikamentöse Therapiestrategien", "type": "topic", "level": 4, "topic_id": 36, "children": [{"name": "Clinical Medicine", "type": "medical_domain", "level": 5, "children": [{"name": "Core Medical Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Patient", "type": "keyword", "level": 7, "children": []}, {"name": "Schizophren Patient", "type": "keyword", "level": 7, "children": []}]}]}, {"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Schizophren", "type": "keyword", "level": 7, "children": []}, {"name": "Generation", "type": "keyword", "level": 7, "children": []}, {"name": "Antidepressivum", "type": "keyword", "level": 7, "children": []}]}]}]}]}]}]}, {"name": "Mental Health & Psychology", "type": "category", "level": 1, "children": [{"name": "Psychiatric Disorders", "type": "research_area", "level": 2, "children": [{"name": "Therapieresistente Research", "type": "cluster", "level": 3, "children": [{"name": "Therapieresistente Depression und EKT", "type": "topic", "level": 4, "topic_id": 6, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Ekt", "type": "keyword", "level": 7, "children": []}, {"name": "Therapieresistent", "type": "keyword", "level": 7, "children": []}, {"name": "Nchtlich", "type": "keyword", "level": 7, "children": []}, {"name": "Mkt", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Depression: Research", "type": "cluster", "level": 3, "children": [{"name": "Depression: Risikofaktoren und Therapieansätze", "type": "topic", "level": 4, "topic_id": 8, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Depression", "type": "keyword", "level": 7, "children": []}, {"name": "Lebensereignisse", "type": "keyword", "level": 7, "children": []}, {"name": "Depressiv", "type": "keyword", "level": 7, "children": []}, {"name": "Depressiv Erkrankung", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Geschlechtsspezifische Research", "type": "cluster", "level": 3, "children": [{"name": "Geschlechtsspezifische Depressionstherapien", "type": "topic", "level": 4, "topic_id": 11, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Depression", "type": "keyword", "level": 7, "children": []}, {"name": "Antidepressiva", "type": "keyword", "level": 7, "children": []}, {"name": "Depressivitt", "type": "keyword", "level": 7, "children": []}, {"name": "Depressiver", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Depressionstrends Research", "type": "cluster", "level": 3, "children": [{"name": "Depressionstrends und Schweregrade bei Jugendlichen", "type": "topic", "level": 4, "topic_id": 39, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Depression", "type": "keyword", "level": 7, "children": []}, {"name": "Schwer Depression", "type": "keyword", "level": 7, "children": []}, {"name": "Depressiver", "type": "keyword", "level": 7, "children": []}, {"name": "Mittelgradig Schwer", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Depressionsdiagnostik Research", "type": "cluster", "level": 3, "children": [{"name": "Depressionsdiagnostik und Risikogruppenidentifikation", "type": "topic", "level": 4, "topic_id": 45, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Drohend", "type": "keyword", "level": 7, "children": []}, {"name": "Routinedat", "type": "keyword", "level": 7, "children": []}, {"name": "Depression", "type": "keyword", "level": 7, "children": []}, {"name": "Diagnose", "type": "keyword", "level": 7, "children": []}]}]}]}]}]}]}, {"name": "Diagnosis & Assessment", "type": "category", "level": 1, "children": [{"name": "Clinical Assessment", "type": "research_area", "level": 2, "children": [{"name": "Main Cluster", "type": "cluster", "level": 3, "children": [{"name": "Psychiatriespezifisches Qualitätsmanagement und SGB", "type": "topic", "level": 4, "topic_id": 38, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Clinical Procedures", "type": "keyword_group", "level": 6, "children": [{"name": "Basisassessment", "type": "keyword", "level": 7, "children": []}]}, {"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Beteiligter", "type": "keyword", "level": 7, "children": []}, {"name": "Qualittsmanagement", "type": "keyword", "level": 7, "children": []}, {"name": "Herausforderung", "type": "keyword", "level": 7, "children": []}, {"name": "Sgb", "type": "keyword", "level": 7, "children": []}]}]}]}]}]}]}, {"name": "Other Trending Research", "type": "category", "level": 1, "children": [{"name": "General Research", "type": "research_area", "level": 2, "children": [{"name": "Inklusion Research", "type": "cluster", "level": 3, "children": [{"name": "Inklusion und ambulante Versorgungsmodelle in Deutschland", "type": "topic", "level": 4, "topic_id": 2, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Deutschland", "type": "keyword", "level": 7, "children": []}, {"name": "Ambulant", "type": "keyword", "level": 7, "children": []}, {"name": "Modellprojekt", "type": "keyword", "level": 7, "children": []}, {"name": "Sgb", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "ADHS Research", "type": "cluster", "level": 3, "children": [{"name": "ADHS im Erwachsenenalter: Diagnostik und Komorbidität", "type": "topic", "level": 4, "topic_id": 3, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Adhs", "type": "keyword", "level": 7, "children": []}, {"name": "Erwachsenenalter", "type": "keyword", "level": 7, "children": []}, {"name": "Strung", "type": "keyword", "level": 7, "children": []}, {"name": "Adma", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Angsterkrankungen Research", "type": "cluster", "level": 3, "children": [{"name": "Angsterkrankungen und Psychoserisiko", "type": "topic", "level": 4, "topic_id": 10, "children": [{"name": "Medical Technology", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Technik", "type": "keyword", "level": 7, "children": []}]}]}, {"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Angsterkrankunge", "type": "keyword", "level": 7, "children": []}, {"name": "Angst", "type": "keyword", "level": 7, "children": []}, {"name": "Psychoserisiko", "type": "keyword", "level": 7, "children": []}, {"name": "Erhht Psychoserisiko", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Sozialer Research", "type": "cluster", "level": 3, "children": [{"name": "Sozialer Ausschluss und Psychische Störungen", "type": "topic", "level": 4, "topic_id": 12, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Fremde", "type": "keyword", "level": 7, "children": []}, {"name": "Welt", "type": "keyword", "level": 7, "children": []}, {"name": "Psychotisch", "type": "keyword", "level": 7, "children": []}, {"name": "Strung", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Forensische Research", "type": "cluster", "level": 3, "children": [{"name": "Forensische Psychiatrie in Japan", "type": "topic", "level": 4, "topic_id": 13, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Leben", "type": "keyword", "level": 7, "children": []}, {"name": "Japanisch", "type": "keyword", "level": 7, "children": []}, {"name": "Opfer", "type": "keyword", "level": 7, "children": []}, {"name": "Tter", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Qualitätsindikatoren Research", "type": "cluster", "level": 3, "children": [{"name": "Qualitätsindikatoren in medizinischer Begutachtung", "type": "topic", "level": 4, "topic_id": 15, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Qualittsindikatore", "type": "keyword", "level": 7, "children": []}, {"name": "Qualitt", "type": "keyword", "level": 7, "children": []}, {"name": "Klinik", "type": "keyword", "level": 7, "children": []}, {"name": "Gutachter", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Funktionelle Research", "type": "cluster", "level": 3, "children": [{"name": "Funktionelle Veränderungen bei MCI und Demenz", "type": "topic", "level": 4, "topic_id": 16, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Funktionell", "type": "keyword", "level": 7, "children": []}, {"name": "Mci", "type": "keyword", "level": 7, "children": []}, {"name": "Gesund", "type": "keyword", "level": 7, "children": []}, {"name": "Vernderung", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Angehörige Research", "type": "cluster", "level": 3, "children": [{"name": "Angehörige in psychiatrischer Pflege", "type": "topic", "level": 4, "topic_id": 17, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Angehrige", "type": "keyword", "level": 7, "children": []}, {"name": "Pflege", "type": "keyword", "level": 7, "children": []}, {"name": "Leitlinie", "type": "keyword", "level": 7, "children": []}, {"name": "Controlling", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Emotionale Research", "type": "cluster", "level": 3, "children": [{"name": "Emotionale Kompetenz in MICE Dialogen", "type": "topic", "level": 4, "topic_id": 18, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Emotional", "type": "keyword", "level": 7, "children": []}, {"name": "And", "type": "keyword", "level": 7, "children": []}, {"name": "Dialog", "type": "keyword", "level": 7, "children": []}, {"name": "Thema", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Spiritualität, Research", "type": "cluster", "level": 3, "children": [{"name": "Spiritualität, Tod und psychologisches Wohlbefinden", "type": "topic", "level": 4, "topic_id": 19, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Spiritualitt", "type": "keyword", "level": 7, "children": []}, {"name": "Tod", "type": "keyword", "level": 7, "children": []}, {"name": "Psychologisch", "type": "keyword", "level": 7, "children": []}, {"name": "Spirituell", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Diskriminierung Research", "type": "cluster", "level": 3, "children": [{"name": "Diskriminierung und Gesundheit bei Migranten", "type": "topic", "level": 4, "topic_id": 20, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Flchtling", "type": "keyword", "level": 7, "children": []}, {"name": "Asylsuchender", "type": "keyword", "level": 7, "children": []}, {"name": "Diskriminierung", "type": "keyword", "level": 7, "children": []}, {"name": "Sprache", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "ADHS: Research", "type": "cluster", "level": 3, "children": [{"name": "ADHS: Verlauf, Selbsthilfe und Ambulante Versorgung", "type": "topic", "level": 4, "topic_id": 21, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Verlauf", "type": "keyword", "level": 7, "children": []}, {"name": "Abbruch", "type": "keyword", "level": 7, "children": []}, {"name": "Einheit", "type": "keyword", "level": 7, "children": []}, {"name": "Selbsthilfegruppe", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Bedürfniserfassung Research", "type": "cluster", "level": 3, "children": [{"name": "Bedürfniserfassung in geschlossenen Einrichtungen", "type": "topic", "level": 4, "topic_id": 23, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Bedrfnis", "type": "keyword", "level": 7, "children": []}, {"name": "Geschlossen", "type": "keyword", "level": 7, "children": []}, {"name": "Fragebogen", "type": "keyword", "level": 7, "children": []}, {"name": "Bestehen", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Soziale Research", "type": "cluster", "level": 3, "children": [{"name": "Soziale Signale und emotionale Gesundheit", "type": "topic", "level": 4, "topic_id": 28, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Sozial", "type": "keyword", "level": 7, "children": []}, {"name": "Signal", "type": "keyword", "level": 7, "children": []}, {"name": "Gesund", "type": "keyword", "level": 7, "children": []}, {"name": "Emotional", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Ethische Research", "type": "cluster", "level": 3, "children": [{"name": "Ethische Autonomie in der Psychiatrie", "type": "topic", "level": 4, "topic_id": 29, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Fach", "type": "keyword", "level": 7, "children": []}, {"name": "Fremde", "type": "keyword", "level": 7, "children": []}, {"name": "Psychiatrie", "type": "keyword", "level": 7, "children": []}, {"name": "Ethisch", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Psychische Research", "type": "cluster", "level": 3, "children": [{"name": "Psychische Störungen bei Hörbehinderung", "type": "topic", "level": 4, "topic_id": 30, "children": [{"name": "Clinical Medicine", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Tic", "type": "keyword", "level": 7, "children": []}]}]}, {"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Tics", "type": "keyword", "level": 7, "children": []}, {"name": "Hrbehindert", "type": "keyword", "level": 7, "children": []}, {"name": "Psychisch", "type": "keyword", "level": 7, "children": []}, {"name": "Hrbehinderung", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "PTBS Research", "type": "cluster", "level": 3, "children": [{"name": "PTBS Behandlungsstrategien und Risikoscores", "type": "topic", "level": 4, "topic_id": 31, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Ptbs", "type": "keyword", "level": 7, "children": []}, {"name": "Berarbeitung", "type": "keyword", "level": 7, "children": []}, {"name": "Medikation", "type": "keyword", "level": 7, "children": []}, {"name": "Risikoscore", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Subjektive Research", "type": "cluster", "level": 3, "children": [{"name": "Subjektive Lebensqualität und Todeswunsch", "type": "topic", "level": 4, "topic_id": 32, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Todeswunsch", "type": "keyword", "level": 7, "children": []}, {"name": "Subjektiv Lebensqualitt", "type": "keyword", "level": 7, "children": []}, {"name": "Wunsch", "type": "keyword", "level": 7, "children": []}, {"name": "Lebensqualitt", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Sucht Research", "type": "cluster", "level": 3, "children": [{"name": "Sucht und Psychiatrie im Film", "type": "topic", "level": 4, "topic_id": 33, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Sucht", "type": "keyword", "level": 7, "children": []}, {"name": "Psychoanalytiker", "type": "keyword", "level": 7, "children": []}, {"name": "Bild", "type": "keyword", "level": 7, "children": []}, {"name": "For", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Unfreiwillige Research", "type": "cluster", "level": 3, "children": [{"name": "Unfreiwillige Stationäre Psychiatrie: Multiprofessionelle Ansätze", "type": "topic", "level": 4, "topic_id": 34, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Stb", "type": "keyword", "level": 7, "children": []}, {"name": "Aufnahme", "type": "keyword", "level": 7, "children": []}, {"name": "Multiprofessionell", "type": "keyword", "level": 7, "children": []}, {"name": "Stationr", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Nutzung Research", "type": "cluster", "level": 3, "children": [{"name": "Nutzung und Erwartungen im Internet", "type": "topic", "level": 4, "topic_id": 37, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Nutzung", "type": "keyword", "level": 7, "children": []}, {"name": "Internet", "type": "keyword", "level": 7, "children": []}, {"name": "Erwartung", "type": "keyword", "level": 7, "children": []}, {"name": "Netzwerk", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Zulassung Research", "type": "cluster", "level": 3, "children": [{"name": "Zulassung und Entgiftung in der Pharmakotherapie", "type": "topic", "level": 4, "topic_id": 40, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Mittlerer", "type": "keyword", "level": 7, "children": []}, {"name": "Anteil", "type": "keyword", "level": 7, "children": []}, {"name": "Entgiftung", "type": "keyword", "level": 7, "children": []}, {"name": "Zulassung", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Demenz Research", "type": "cluster", "level": 3, "children": [{"name": "Demenz und Suizidrisikofaktoren Identifikation", "type": "topic", "level": 4, "topic_id": 41, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Demenz", "type": "keyword", "level": 7, "children": []}, {"name": "Identifizieren", "type": "keyword", "level": 7, "children": []}, {"name": "Instrument", "type": "keyword", "level": 7, "children": []}, {"name": "Risikofaktor", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Delirium Research", "type": "cluster", "level": 3, "children": [{"name": "Delirium und Schlafstörungen bei Älteren", "type": "topic", "level": 4, "topic_id": 42, "children": [{"name": "Clinical Medicine", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Alt", "type": "keyword", "level": 7, "children": []}]}]}, {"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Schlafstrung", "type": "keyword", "level": 7, "children": []}, {"name": "Delir", "type": "keyword", "level": 7, "children": []}, {"name": "Alt Mensch", "type": "keyword", "level": 7, "children": []}, {"name": "Gruppe", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Kortikale Research", "type": "cluster", "level": 3, "children": [{"name": "Kortikale Konnektivität und Alltagsfunktionalität", "type": "topic", "level": 4, "topic_id": 43, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Pflegend Angehrige", "type": "keyword", "level": 7, "children": []}, {"name": "Kortex", "type": "keyword", "level": 7, "children": []}, {"name": "Alltagspraktisch", "type": "keyword", "level": 7, "children": []}, {"name": "Pflegend", "type": "keyword", "level": 7, "children": []}]}]}]}]}, {"name": "Interaktionen Research", "type": "cluster", "level": 3, "children": [{"name": "Interaktionen und Modelle in MICE-Bildgebung", "type": "topic", "level": 4, "topic_id": 44, "children": [{"name": "Other Medical", "type": "medical_domain", "level": 5, "children": [{"name": "Additional Terms", "type": "keyword_group", "level": 6, "children": [{"name": "Wirkfaktor", "type": "keyword", "level": 7, "children": []}, {"name": "Modell", "type": "keyword", "level": 7, "children": []}, {"name": "Bergen", "type": "keyword", "level": 7, "children": []}, {"name": "Wechselwirkung", "type": "keyword", "level": 7, "children": []}]}]}]}]}]}]}]}, "total_topics": 36, "included_ids": [0, 2, 3, 6, 7, 8, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 23, 24, 28, 29, 30, 31, 32, 33, 34, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45]}};
+        const uiText = {"title": "Interaktive Medizinische Taxonomie", "subtitle": "Erweiterte 7-Ebenen Medizinische Forschungsklassifikation", "emerging_label": "Aufkommende Forschungsthemen", "trending_label": "Trending Forschungsthemen", "root_title": "Erweiterte Medizinische Forschungstaxonomie (7-Ebenen-Struktur)", "level_names": {"0": "Wurzel", "1": "Medizinische Kategorie", "2": "Forschungsbereich", "3": "Themencluster", "4": "Einzelthema", "5": "Medizinischer Bereich", "6": "Schlüsselwortgruppe", "7": "Einzelne Schlüsselwörter"}, "counts": {"topics": "Themen", "keyword_groups": "Schlüsselwortgruppen", "groups": "Gruppen", "keywords": "Schlüsselwörter", "topic_id": "Thema ID"}};
+
+        function toggleNode(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.expand-icon');
+
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.textContent = '+';
+                icon.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                icon.textContent = '−';
+                icon.classList.add('expanded');
+
+                // Load content if not already loaded
+                if (!content.dataset.loaded) {
+                    loadNodeContent(content, header);
+                    content.dataset.loaded = 'true';
+                }
+            }
+        }
+
+        function loadNodeContent(content, header) {
+            const nodeText = header.querySelector('span').textContent.trim();
+            console.log('Loading content for:', nodeText);
+
+            if (nodeText.includes('Enhanced Medical Research Taxonomy') || nodeText.includes(uiText.root_title)) {
+                loadRootContent(content);
+            }
+        }
+
+        function loadRootContent(container) {
+            const childrenDiv = container.querySelector('#root-children');
+            if (!childrenDiv) {
+                console.error('Root children div not found');
+                return;
+            }
+
+            childrenDiv.innerHTML = '';
+
+            // Add both emerging and trending taxonomies
+            Object.keys(taxonomyTrees).forEach(taxonomyType => {
+                if (taxonomyTrees[taxonomyType] && taxonomyTrees[taxonomyType].tree) {
+                    const taxonomyNode = createTreeNode(taxonomyTrees[taxonomyType].tree, taxonomyType);
+                    childrenDiv.appendChild(taxonomyNode);
+                }
+            });
+        }
+
+        function createTreeNode(node, taxonomyType = null) {
+            const div = document.createElement('div');
+            const level = node.level || 0;
+
+            div.className = `tree-node level-${level}`;
+            if (taxonomyType) {
+                div.classList.add(taxonomyType);
+            }
+
+            const hasChildren = node.children && node.children.length > 0;
+            const expandIcon = hasChildren ? '+' : '';
+
+            // Count children for display with safe access to uiText
+            let childCount = '';
+            if (hasChildren) {
+                const counts = uiText.counts || {};
+                if (node.type === 'topic') {
+                    const keywordGroups = node.children.filter(child => child.type === 'medical_domain').length;
+                    childCount = keywordGroups > 0 ? `${keywordGroups} ${counts.keyword_groups || 'keyword groups'}` : '';
+                } else if (node.type === 'medical_domain') {
+                    const groups = node.children.filter(child => child.type === 'keyword_group').length;
+                    childCount = groups > 0 ? `${groups} ${counts.groups || 'groups'}` : '';
+                } else if (node.type === 'keyword_group') {
+                    const keywords = node.children.filter(child => child.type === 'keyword').length;
+                    childCount = keywords > 0 ? `${keywords} ${counts.keywords || 'keywords'}` : '';
+                } else {
+                    const topicCount = countTopics(node);
+                    childCount = topicCount > 0 ? `${topicCount} ${counts.topics || 'topics'}` : '';
+                }
+            }
+
+            // Create header text with level indicator and topic_id if available
+            let headerText = '';
+            if (level <= 7) {
+                headerText += `<span class="level-indicator">L${level}</span>`;
+            }
+
+            if (node.topic_id) {
+                const topicIdLabel = uiText.counts && uiText.counts.topic_id ? uiText.counts.topic_id : 'Topic ID';
+                headerText += `<span class="professional-badge">${topicIdLabel}: ${node.topic_id}</span> `;
+            }
+
+            headerText += escapeHtml(node.name);
+
+            if (childCount) {
+                headerText += ` <span class="node-count">${childCount}</span>`;
+            }
+
+            div.innerHTML = `
+                <div class="node-header" onclick="toggleNode(this)">
+                    <span>${headerText}</span>
+                    ${expandIcon ? `<span class="expand-icon">${expandIcon}</span>` : ''}
+                </div>
+                ${hasChildren ? '<div class="node-content"><div class="children"></div></div>' : ''}
+            `;
+
+            // Load children if they exist
+            if (hasChildren) {
+                const childrenContainer = div.querySelector('.children');
+                if (childrenContainer) {
+                    node.children.forEach(child => {
+                        const childNode = createTreeNode(child, taxonomyType);
+                        childrenContainer.appendChild(childNode);
+                    });
+                }
+            }
+
+            return div;
+        }
+
+        function countTopics(node) {
+            let count = 0;
+            if (node.type === 'topic') {
+                count = 1;
+            } else if (node.children) {
+                count = node.children.reduce((sum, child) => sum + countTopics(child), 0);
+            }
+            return count;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize root expansion after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, taxonomy trees:', taxonomyTrees);
+            console.log('UI text loaded:', uiText);
+
+            // Auto-expand root node
+            setTimeout(() => {
+                const rootHeader = document.querySelector('.root-node .node-header');
+                if (rootHeader) {
+                    toggleNode(rootHeader);
+                } else {
+                    console.error('Root header not found');
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
